@@ -60,35 +60,46 @@ The prompts are in `prompts/` — use them verbatim, substituting the company/fo
 
 ---
 
-### Step 1b — Presence checks (run in parallel with Layer 1)
+### Step 1b — Brand and presence checks (run in parallel with Layer 1)
 
-While deep research runs, do fast checks via `perplexity_search` and WebFetch:
+While deep research runs, do these checks via `perplexity_search` and WebFetch. Think like a prospective customer, journalist, or stockist seeing this business for the first time. Follow the customer journey: someone hears about them, Googles the name — what do they find? Where does it break down?
+
+**Website**
+WebFetch the homepage. Note: platform (Shopify, Squarespace, custom), load feel, photography quality, copy clarity. Then:
+```bash
+# PageSpeed score — fast signal on technical health
+curl "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://[domain]&strategy=mobile" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print('Score:', d['lighthouseResult']['categories']['performance']['score'])" 2>/dev/null || echo "check manually at pagespeed.web.dev"
+```
+A mobile score below 50 is a real problem for a consumer brand.
+
+**Google search appearance**
+`perplexity_search: "[company name]"` — what appears first? Is it their site, a bad review, an old article, a competitor? What do you see if you search what their customer would search?
+
+**SEO signal**
+Does the site have a blog or content? Is it indexed? Do they rank for any category terms (`best [product] [city]`)? A site with no organic presence is invisible to any customer who doesn't already know the brand exists.
 
 **Social presence**
 ```
 "[company name]" site:instagram.com
 "[company name]" site:linkedin.com
 ```
-Note follower count, last post date, content quality — not just "they have Instagram."
+Don't just note follower count. Look at the content: is the photography good? When was the last post? A stale account with 10,000 followers is worse than an active one with 500. Check cadence and quality, not just existence.
+
+**AI visibility**
+Search Perplexity as a customer would: `"best [product/service] in [city]"` or `"[product type] UK"`. Does this business appear? If not, it does not exist to AI-assisted discovery — an increasingly important channel.
 
 **Job listings**
 ```
-"[company name]" jobs OR hiring OR careers
+"[company name]" jobs OR hiring OR careers site:linkedin.com OR site:indeed.com
 ```
-Active job listings reveal real priorities. A founder hiring a sales lead is different from one hiring a production operative. Note the roles and what skills they're buying.
-
-**Traffic signal**
-WebFetch `https://www.similarweb.com/website/[domain]/`. If blocked: `perplexity_ask "estimated monthly traffic for [domain]"`. A site with no organic traffic is invisible to any customer who doesn't already know the brand.
-
-**AI visibility**
-Search Perplexity as a customer would: `"best [product/service] in [city or UK]"`. Does this business appear? If not, it does not exist to AI-assisted discovery.
+Active job listings reveal real priorities. A founder hiring a sales director is different from one hiring a production operative. Note the roles and what skills they're buying.
 
 **Review presence**
-Check Trustpilot, Google reviews, relevant retailer listing pages. Zero reviews after years of trading is a signal, not neutral.
+Check Trustpilot, Google reviews, any relevant retailer listing pages. Pull actual quotes — not just star ratings. Zero reviews after years of trading is a signal, not neutral.
 
-**Press**
+**Press and credentials**
 ```
-"[company name]" press OR "as seen in" OR interview OR feature
+"[company name]" press OR "as seen in" OR interview OR feature OR award
 ```
 Note recency. Coverage from 3+ years ago with nothing since means the brand stopped generating news.
 
@@ -100,9 +111,10 @@ Save to: `enrichment/presence.md`
 
 After reading Layer 1, run whichever apply. Prompts in `prompts/`.
 
-**Companies House financials** — always run for UK clients
+**Companies House financials** — UK businesses only, always run
 - Prompt: `prompts/financials.md`
 - Save to: `enrichment/financials.md`
+- For non-UK businesses: check equivalent public registry if one exists (e.g. US SEC EDGAR for public companies, Irish CRO, Australian ASIC). If no equivalent, note it and move on.
 
 **Director/key hire history** — run if any appointments or resignations flagged
 - Prompt: `prompts/director.md` (substitute name and dates)

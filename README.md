@@ -1,6 +1,6 @@
 # founder-research
 
-Pre-meeting intelligence pipeline for a founder-operated business. Runs layered Perplexity deep research — company, founder, market, Companies House financials, job listings, social presence, traffic signals — then reduces everything to a 90-second CIA-style brief with non-obvious signals and opening questions.
+Perplexity-powered pre-meeting intelligence for a founder-operated business. Runs parallel deep research on company, founder, and market — then layers in brand presence, SEO signals, job listings, financial filings, and social content quality. Reduces to a 90-second brief: named facts, non-obvious signals, and opening questions.
 
 Built for consultants, investors, journalists, and advisors who need to understand a business before a call.
 
@@ -11,36 +11,52 @@ Built for consultants, investors, journalists, and advisors who need to understa
 /founder-research "Acme Ltd" acme.co.uk --sherlock
 ```
 
-`--sherlock` hunts the founder's username across 400+ platforms. Use when Perplexity doesn't surface their social accounts.
+`--sherlock` runs a username search across 400+ platforms. Use when Perplexity doesn't surface the founder's social accounts.
+
+## What it researches
+
+**Layer 1 — Perplexity deep research (parallel)**
+- Company: products, distribution, pricing, positioning, recent news
+- Founder: background, communication register, public output, direct quotes
+- Market: size, competitors with specifics, distribution dynamics, customer profile
+
+**Layer 2 — Brand and presence (parallel with Layer 1)**
+- Website quality: platform, PageSpeed score, photography, copy
+- Google search appearance — what a customer actually finds
+- SEO signal: indexed, ranking for category terms, organic presence
+- Social: content quality and cadence, not just follower counts
+- AI visibility: does this business appear when a customer searches Perplexity?
+- Job listings: what they're actively hiring reveals real priorities
+- Reviews: actual quotes, not just star ratings. Zero reviews is a finding.
+- Press: recency matters — coverage from 3 years ago with nothing since is a signal
+
+**Layer 3 — Gap-fills (on demand)**
+- Financial filings: balance sheet, cash, director history (UK Companies House; equivalent registries for other countries)
+- Director research: who they brought in, why, what happened
+- Competitor pricing table
+- Customer UGC and community signal
 
 ## What it produces
 
 ```
 enrichment/
-  company.md          raw Perplexity output — company basics, products, distribution
-  founder.md          raw Perplexity output — background, register, public output
-  market.md           raw Perplexity output — market size, competitors, trends
-  financials.md       Companies House balance sheet + director history (UK)
-  presence.md         social, traffic, AI visibility, reviews, press
+  company.md          Perplexity — company basics, products, distribution
+  founder.md          Perplexity — background, register, public output
+  market.md           Perplexity — size, competitors, trends
+  presence.md         brand, SEO, social, AI visibility, reviews, press
+  financials.md       financial filing + director history
   pricing.md          competitor pricing table (if run)
-  customer.md         reviews and UGC signal (if run)
+  customer.md         reviews and UGC (if run)
   director-[name].md  individual director research (if flagged)
-brief.md              the final brief — reads in 90 seconds
-post-call.md          reconciled notes after the call (Step 5)
+brief.md              final brief — reads in 90 seconds
+post-call.md          reconciled notes after the call
 ```
-
-## What it doesn't do
-
-- Does not contact the business or send anything externally
-- Does not make engagement or investment recommendations
-- Companies House data is UK only
-- `--sherlock` checks account existence, not content
 
 ## Requirements
 
-- [Perplexity MCP](https://github.com/ppl-ai/modelcontextprotocol) configured in Claude Code
-- `sherlock-project` Python package — only needed for `--sherlock`
-- Notion MCP — only needed if pushing brief to Notion
+- [Perplexity MCP](https://github.com/ppl-ai/modelcontextprotocol) configured in Claude Code — core dependency
+- `sherlock-project` Python package — only for `--sherlock`
+- Notion MCP — only if pushing brief to Notion
 
 ## Install
 
@@ -51,17 +67,17 @@ git clone https://github.com/b1rdmania/founder-research ~/.claude/skills/founder
 ## Repo structure
 
 ```
-SKILL.md                  skill definition and pipeline
-prompts/                  Perplexity query templates — use verbatim
+SKILL.md                  full pipeline
+prompts/                  verbatim Perplexity query templates
   company.md
   founder.md
   market.md
-  financials.md
+  financials.md           UK Companies House (adapt for other registries)
   director.md
   pricing.md
   customer.md
 examples/
-  brief-template.md       annotated output template showing what good looks like
+  brief-template.md       annotated output showing what good looks like
 ```
 
 ## License
