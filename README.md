@@ -1,8 +1,8 @@
-# founder-research
+# What they won't tell you
 
-Perplexity-powered pre-meeting intelligence for a founder-operated business. Runs deep research on company, founder, and market in parallel — then layers in brand presence, SEO signals, job listings, financial filings, and social content quality. Reduces to a 90-second brief: named facts, non-obvious signals, and opening questions.
+Deep research on any founder and their business. Reduces to a 90-second brief with the signals that aren't on their website.
 
-Built for consultants, investors, journalists, and advisors who need to understand a business before a call.
+Built for consultants, investors, journalists, and advisors who need to understand a business before a call. Runs on [Perplexity](https://www.perplexity.ai) via Claude Code — company, founder, market, financials, brand presence, SEO, job listings, and social signals researched in parallel and reduced to what actually matters.
 
 **Recommended: run with Claude Opus 4.7.** The research phase requires judgment — deciding which threads to pull, what to skip, how to read conflicting signals. Opus handles this better than a prescriptive checklist.
 
