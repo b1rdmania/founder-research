@@ -122,7 +122,7 @@ Save to `enrichment/presence.md`.
 
 Read what you have. Decide what's missing and matters. Run only what will actually change the brief.
 
-**Financial filings** — for UK businesses, always worth pulling (`prompts/financials.md`). Find the record with `sweep "[company name]" --domains find-and-update.company-information.service.gov.uk`, then `fetch` the overview, `/officers`, `/filing-history` and `/charges` pages. Cash, equity, and director history are facts no founder will volunteer. For non-UK businesses, pin the equivalent registry with `--domains` (Irish CRO, Australian ASIC, SEC EDGAR for US public companies) — if none exists, note it and move on.
+**Financial filings** — establish the jurisdiction first; the registry follows it. For UK-registered businesses, always worth pulling (`prompts/financials.md`). Find the record with `sweep "[company name]" --domains find-and-update.company-information.service.gov.uk`, then `fetch` the overview, `/officers`, `/filing-history` and `/charges` pages. Cash, equity, and director history are facts no founder will volunteer. Never run Companies House on a non-UK business or person; homonyms are not leads. For other jurisdictions pin the equivalent registry with `--domains` (Irish CRO, Australian ASIC, SEC EDGAR for US public companies, state Secretary of State sites for US private ones) — if none exists, note it and move on.
 
 **Director research** — if the officers page flags an appointment or resignation, use `prompts/director.md`. `fetch` the officer's own appointments page for their other companies. A co-director hired and gone in 3 months is more revealing than anything on the website.
 
