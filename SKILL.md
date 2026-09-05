@@ -18,7 +18,7 @@ license: MIT
 
 Pre-meeting intelligence for anyone who needs to understand a founder-operated business before a call — consultants, investors, journalists, advisors, potential partners.
 
-Takes public information. Produces a CIA-style brief: named facts, non-obvious signals, gaps, and suggested opening questions. No fluff. Reads in 90 seconds.
+Takes public information. Produces a CIA-style brief: named facts, non-obvious signals, gaps, and suggested opening questions. No fluff.
 
 Run it on a model with judgment. The research phase means deciding what to pursue, synthesising conflicting signals, and deciding what matters — not executing a checklist.
 
@@ -83,7 +83,7 @@ If the founder has no public profile, a detailed founder query will return littl
 
 **Company** (`prompts/company.md`) — `sweep --category company`, then `extract --schema schemas/company.json` for entity, founders, funding, leadership changes
 **Founder** (`prompts/founder.md`) — `sweep --category people`, then `extract --schema schemas/person.json` for roles, public output, direct quotes
-**Market** (`prompts/market.md`) — `sweep --category news --since <18 months ago>` for moves; `perplexity_research` if installed for the narrative
+**Market** (`prompts/market.md`) — `sweep --category news --since [18 months ago]` for moves; `perplexity_research` if installed for the narrative
 
 Every lead that will go in the brief gets a `fetch` of its source. Save raw output to `enrichment/`.
 
@@ -108,7 +108,7 @@ curl "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://[do
 
 **AI visibility** — ask as a customer: `sweep "best [product/service] in [city]"`, and `perplexity_ask` if installed. Does this business appear? Increasingly how buyers find suppliers.
 
-**Job listings** — `sweep "[company name] hiring" --domains linkedin.com/jobs,indeed.com --since <6 months ago>`. What skills are they buying? Often more honest about priorities than their strategy page.
+**Job listings** — `sweep "[company name] hiring" --domains linkedin.com/jobs,indeed.com --since [6 months ago]`. What skills are they buying? Often more honest about priorities than their strategy page.
 
 **Reviews** — Trustpilot, Google, retailer listing pages. Pull actual quotes, not just star ratings. Zero reviews after years of trading is a finding.
 

@@ -139,11 +139,10 @@ Example:
 
 ## Sources
 
-- `enrichment/company.md`
-- `enrichment/founder.md`
-- `enrichment/market.md`
-- `enrichment/financials.md`
-- `enrichment/presence.md`
-- `enrichment/pricing.md` *(if run)*
-- `enrichment/customer.md` *(if run)*
-- `enrichment/director-[name].md` *(if run)*
+Primary-record URLs fetched during research, one per line. Enrichment files stay on disk and are not listed.
+
+- https://find-and-update.company-information.service.gov.uk/company/[number] — overview, officers, filing history
+- https://[company site]/about — team page, as read on [date]
+- https://www.linkedin.com/in/[founder] — profile, as fetched on [date]
+- [press interview URL] — direct quotes
+- [retailer listing URL] — pricing and review count
