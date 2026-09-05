@@ -1,6 +1,6 @@
 # Customer Signal Prompt
 
-Use with `perplexity_search`. Substitute [COMPANY NAME].
+Use as `sweep` queries with `--domains` per source below, or with `perplexity_search` if installed. Substitute [COMPANY NAME].
 
 ---
 

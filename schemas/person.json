@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "employer": { "type": "string" },
+          "title": { "type": "string" },
+          "start": { "type": "string" },
+          "end": { "type": "string" }
+        }
+      }
+    },
+    "public_output": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "what": { "type": "string" },
+          "date": { "type": "string" }
+        }
+      }
+    },
+    "direct_quotes": { "type": "array", "items": { "type": "string" } }
+  }
+}

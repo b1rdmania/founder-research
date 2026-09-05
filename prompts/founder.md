@@ -1,6 +1,6 @@
 # Founder Research Prompt
 
-Use verbatim with `perplexity_research`. Substitute [FOUNDER FULL NAME] and [COMPANY NAME].
+Run `sweep` first, then use this as the `extract` question (schemas/person.json). If Perplexity is installed, it also works verbatim with `perplexity_research`. Substitute [FOUNDER FULL NAME] and [COMPANY NAME].
 
 ---
 

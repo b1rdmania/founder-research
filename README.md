@@ -2,7 +2,9 @@
 
 Deep research on any founder and their business. Reduces to a 90-second brief with the signals that aren't on their website.
 
-Built for consultants, investors, journalists, and advisors who need to understand a business before a call. Runs on [Perplexity](https://www.perplexity.ai) via Claude Code — company, founder, market, financials, brand presence, SEO, job listings, and social signals researched in parallel and reduced to what actually matters.
+Built for consultants, investors, journalists, and advisors who need to understand a business before a call. Runs on [Exa](https://exa.ai) via Claude Code — company, founder, market, financials, brand presence, SEO, job listings, and social signals swept in parallel, every lead chased to its primary record, and reduced to what actually matters.
+
+The rule the whole pipeline runs on: **search finds leads, only a primary record makes a fact.** Exa does the finding and the fetching. The record does the proving.
 
 **Recommended: run with Claude Opus 4.7.** The research phase requires judgment — deciding which threads to pull, what to skip, how to read conflicting signals. Opus handles this better than a prescriptive checklist.
 
@@ -13,27 +15,27 @@ Built for consultants, investors, journalists, and advisors who need to understa
 /founder-research "Acme Ltd" acme.co.uk --sherlock
 ```
 
-`--sherlock` hunts the founder's username across 400+ platforms. Use when Perplexity doesn't surface their social accounts.
+`--sherlock` hunts the founder's username across 400+ platforms. Use when the sweep doesn't surface their social accounts.
 
 ## What it researches
 
-**Layer 1 — Perplexity deep research (parallel)**
-- Company: products, distribution, pricing, positioning, recent news
-- Founder: background, communication register, public output, direct quotes
-- Market: size and growth, named competitors with specifics, distribution dynamics
+**Layer 1 — Sweep and extract (parallel)**
+- Company: `sweep --category company` then a typed `extract` — entity, founders, funding, leadership changes
+- Founder: `sweep --category people` then a typed `extract` — roles, public output, direct quotes, each field cited
+- Market: recent moves by `sweep --category news`; the narrative from Perplexity if you have it
 
 **Layer 2 — Brand and presence (parallel with Layer 1)**
 - Website quality: platform, PageSpeed, photography, copy
 - Google search: what a customer actually finds when they look
 - SEO signal: indexed, ranking for category terms, organic presence
 - Social: content quality and cadence — not just follower counts
-- AI visibility: does this business appear when a customer searches Perplexity?
+- AI visibility: does this business appear when a customer asks a search engine or an AI?
 - Job listings: what they're hiring reveals priorities more honestly than their strategy page
 - Reviews: actual quotes. Zero reviews after years of trading is a finding.
 - Press: recency matters
 
 **Layer 3 — Gap-fills (on demand, judgment call)**
-- Financial filings: balance sheet, cash, director history (UK Companies House; equivalent registries for other countries if available)
+- Financial filings: Companies House pages live-crawled with `fetch` — balance sheet, cash, director history (pin any other registry with `--domains`)
 - Director research: who they brought in, why, what happened
 - Competitor pricing table
 - Customer UGC and community signal
@@ -48,9 +50,13 @@ post-call.md          reconciled notes after the call
 
 ## Setup
 
-**1. Install the Perplexity MCP**
+**1. Get an Exa key**
 
-Perplexity is the core dependency. Add it to your Claude Code MCP config (`~/.claude.json`):
+Sign up at [dashboard.exa.ai](https://dashboard.exa.ai) and put the key in `~/.exa-key` (or export `EXA_API_KEY`). Node 18+ is the only dependency. A full run costs well under a dollar: standard search is $0.007 a call, deep search $0.012, a page fetch $0.001.
+
+Without a key the skill degrades to Claude Code's built-in `WebSearch` and `WebFetch`.
+
+**Optional: Perplexity MCP.** Still useful for narrative angles (market story, the contrarian read). Add it to `~/.claude.json`:
 
 ```json
 {
@@ -59,15 +65,11 @@ Perplexity is the core dependency. Add it to your Claude Code MCP config (`~/.cl
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "@perplexity-ai/mcp-server"],
-      "env": {
-        "PERPLEXITY_API_KEY": "pplx-..."
-      }
+      "env": { "PERPLEXITY_API_KEY": "pplx-..." }
     }
   }
 }
 ```
-
-Get an API key at [perplexity.ai/settings/api](https://www.perplexity.ai/settings/api). The `perplexity_research` tool (used for deep research) costs roughly $0.005 per query — a full run is a few cents.
 
 **2. Install the skill**
 
@@ -89,7 +91,9 @@ pip install sherlock-project
 
 ```
 SKILL.md                  skill definition and pipeline
-prompts/                  Perplexity query templates — reference, not mandatory
+scripts/exa.mjs           sweep / fetch / extract — the Exa layer, no dependencies
+schemas/                  extract schemas (person, company) — Exa caps them at 10 properties
+prompts/                  query templates — reference, not mandatory
   company.md
   founder.md
   market.md

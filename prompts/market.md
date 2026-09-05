@@ -1,6 +1,6 @@
 # Market Research Prompt
 
-Use verbatim with `perplexity_research`. Substitute [VERTICAL] and [COUNTRY/REGION].
+Use as the `extract` question with a market schema of your own, or verbatim with `perplexity_research` if installed. Chase every figure with `fetch`. Substitute [VERTICAL] and [COUNTRY/REGION].
 
 ---
 

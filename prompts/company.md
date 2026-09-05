@@ -1,6 +1,6 @@
 # Company Research Prompt
 
-Use verbatim with `perplexity_research`. Substitute [COMPANY NAME] and [DESCRIPTION].
+Run `sweep` first, then use this as the `extract` question (schemas/company.json). If Perplexity is installed, it also works verbatim with `perplexity_research`. Substitute [COMPANY NAME] and [DESCRIPTION].
 
 ---
 

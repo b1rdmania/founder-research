@@ -1,6 +1,6 @@
 # Companies House Financials Prompt
 
-UK businesses only. Use with `perplexity_research`. Substitute [COMPANY NAME] and [COMPANY NUMBER] if known.
+UK businesses only. Checklist for reading the pages you `fetch` from Companies House (overview, /officers, /filing-history, /charges); no search tool reads the accounts PDF for you. Substitute [COMPANY NAME] and [COMPANY NUMBER] if known.
 
 ---
 

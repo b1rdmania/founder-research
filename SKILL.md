@@ -1,12 +1,13 @@
 ---
 name: founder-research
-description: Pre-meeting intelligence pipeline for a founder-operated business. Leads with Perplexity deep research across company, founder, market, financials, and presence signals, then reduces everything to a scannable CIA-style brief with non-obvious signals and opening questions. Use before any call with a founder.
-version: 1.1.0
+description: Pre-meeting intelligence pipeline for a founder-operated business. Sweeps the web with Exa across company, founder, market, financials, and presence signals, chases every lead to its primary record, then reduces everything to a scannable CIA-style brief with non-obvious signals and opening questions. Use before any call with a founder.
+version: 1.2.0
 tools:
   - Bash
   - Read
   - Write
   - WebFetch
+  - WebSearch
   - mcp__perplexity__perplexity_research
   - mcp__perplexity__perplexity_ask
   - mcp__perplexity__perplexity_search
@@ -28,7 +29,29 @@ Takes public information. Produces a CIA-style brief: named facts, non-obvious s
 /founder-research "<Company Name>" <website> --sherlock
 ```
 
-`--sherlock` runs a username search across 400+ platforms. Use when the founder has low public footprint or Perplexity doesn't surface their social accounts.
+`--sherlock` runs a username search across 400+ platforms. Use when the founder has low public footprint or the sweep doesn't surface their social accounts.
+
+---
+
+## Tools
+
+**Search finds leads. Only a primary record makes a fact.** The tool layer is built around that split.
+
+`scripts/exa.mjs` is the discovery and fetch layer (Exa API, key in `EXA_API_KEY` or `~/.exa-key`):
+
+```bash
+node scripts/exa.mjs sweep "<query>" [--category people|company|news] [--domains a.com,b.org] [--since YYYY-MM-DD] [--n 8]
+node scripts/exa.mjs fetch <url> [<url>...]                     # live-crawl the page text
+node scripts/exa.mjs extract "<question>" --schema schemas/person.json   # typed leads, each field cited
+```
+
+- `sweep` returns leads with URLs and page text. `--category people` finds profile pages; `--category company` finds the company record; `--domains` pins a registry (Companies House, SEC, a court).
+- `fetch` is the chase. It live-crawls the primary record so the quote you cite is what the page says today.
+- `extract` runs Exa's deep search against a JSON schema (10 properties max, nested ones count) and returns `content` plus a `grounding` block naming the source and confidence per field. Treat `content` as leads: fetch the grounding URL before a field becomes a fact. Narrow questions work; a broad "tell me about the company" question comes back thin.
+
+Costs are printed to stderr. A full run is well under a dollar.
+
+**Degrade, don't fail.** If the script reports no key, run the same steps on `WebSearch` + `WebFetch`. If the Perplexity MCP is installed, `perplexity_research` is still useful for the *argument* angles (market narrative, the contrarian read) where a synthesised answer beats a list of pages; every name and number it surfaces is still chased with `fetch`.
 
 ---
 
@@ -52,17 +75,17 @@ If it passes: read the website properly. Homepage, About, Products or Services, 
 
 ---
 
-### Step 1 — Deep research
+### Step 1 — Sweep and extract
 
-Use `perplexity_research` to investigate the company, founder, and market. Run in parallel where possible.
+Investigate the company, founder, and market. Run the calls in parallel where possible.
 
 Reference prompts are in `prompts/` — use them as a starting point and adapt based on what you already know about this business. You don't need to run every prompt. Use judgment: if the founder has no public profile, a detailed founder query will return little; if the market is niche, a broad market query will return generalities. Adjust accordingly.
 
-**Company** (`prompts/company.md`) — products, distribution, pricing, positioning, recent news
-**Founder** (`prompts/founder.md`) — background, communication register, public output, direct quotes
-**Market** (`prompts/market.md`) — size, named competitors with specifics, distribution dynamics, customer profile
+**Company** (`prompts/company.md`) — `sweep --category company`, then `extract --schema schemas/company.json` for entity, founders, funding, leadership changes
+**Founder** (`prompts/founder.md`) — `sweep --category people`, then `extract --schema schemas/person.json` for roles, public output, direct quotes
+**Market** (`prompts/market.md`) — `sweep --category news --since <18 months ago>` for moves; `perplexity_research` if installed for the narrative
 
-Save raw output to `enrichment/`.
+Every lead that will go in the brief gets a `fetch` of its source. Save raw output to `enrichment/`.
 
 ---
 
@@ -77,19 +100,19 @@ Areas to cover — use judgment on which matter for this specific business:
 curl "https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=https://[domain]&strategy=mobile" 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print('Score:', d['lighthouseResult']['categories']['performance']['score'])" 2>/dev/null || echo "check at pagespeed.web.dev"
 ```
 
-**Google search appearance** — `perplexity_search "[company name]"`. What does a customer actually find? Their site, a bad review, nothing?
+**Search appearance** — `sweep "[company name]" --n 10`. What does a customer actually find? Their site, a bad review, nothing?
 
 **SEO signal** — does the site have content? Does it rank for category terms? No organic presence = invisible to anyone who doesn't already know the brand.
 
-**Social** — search `"[company name]" site:instagram.com` and equivalent. Don't just log follower counts. Is the content good? When was the last post? A stale account with 10k followers is worse than an active one with 500.
+**Social** — `sweep "[company name]" --domains instagram.com,linkedin.com,tiktok.com` and `fetch` the profile. Don't just log follower counts. Is the content good? When was the last post? A stale account with 10k followers is worse than an active one with 500.
 
-**AI visibility** — search Perplexity as a customer: `"best [product/service] in [city]"`. Does this business appear? Increasingly how buyers find suppliers.
+**AI visibility** — ask as a customer: `sweep "best [product/service] in [city]"`, and `perplexity_ask` if installed. Does this business appear? Increasingly how buyers find suppliers.
 
-**Job listings** — `"[company name]" jobs OR hiring site:linkedin.com`. What skills are they buying? Often more honest about priorities than their strategy page.
+**Job listings** — `sweep "[company name] hiring" --domains linkedin.com/jobs,indeed.com --since <6 months ago>`. What skills are they buying? Often more honest about priorities than their strategy page.
 
 **Reviews** — Trustpilot, Google, retailer listing pages. Pull actual quotes, not just star ratings. Zero reviews after years of trading is a finding.
 
-**Press** — `"[company name]" press OR interview OR feature OR award`. Note recency — 3-year-old coverage with nothing since is a signal.
+**Press** — `sweep "[company name] interview OR feature OR award" --category news`. Note recency — 3-year-old coverage with nothing since is a signal.
 
 Save to `enrichment/presence.md`.
 
@@ -99,9 +122,9 @@ Save to `enrichment/presence.md`.
 
 Read what you have. Decide what's missing and matters. Run only what will actually change the brief.
 
-**Financial filings** — for UK businesses, always worth pulling via `prompts/financials.md`. Cash, equity, and director history are facts no founder will volunteer. For non-UK businesses, check equivalent registries (Irish CRO, Australian ASIC, US SEC EDGAR for public companies) — if none exists, note it and move on.
+**Financial filings** — for UK businesses, always worth pulling (`prompts/financials.md`). Find the record with `sweep "[company name]" --domains find-and-update.company-information.service.gov.uk`, then `fetch` the overview, `/officers`, `/filing-history` and `/charges` pages. Cash, equity, and director history are facts no founder will volunteer. For non-UK businesses, pin the equivalent registry with `--domains` (Irish CRO, Australian ASIC, SEC EDGAR for US public companies) — if none exists, note it and move on.
 
-**Director research** — if the financials flag an appointment or resignation, use `prompts/director.md`. A co-director hired and gone in 3 months is more revealing than anything on the website.
+**Director research** — if the officers page flags an appointment or resignation, use `prompts/director.md`. `fetch` the officer's own appointments page for their other companies. A co-director hired and gone in 3 months is more revealing than anything on the website.
 
 **Pricing** — if you couldn't find retail prices in Layer 1, use `prompts/pricing.md`. Price opacity is itself a finding.
 

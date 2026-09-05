@@ -1,6 +1,6 @@
 # Pricing Research Prompt
 
-Use with `perplexity_search` or `perplexity_research`. Substitute [COMPANY NAME], [COUNTRY], and [COMPETITOR LIST].
+Use as a `sweep` query per competitor, or with `perplexity_search` if installed. Substitute [COMPANY NAME], [COUNTRY], and [COMPETITOR LIST].
 
 ---
 

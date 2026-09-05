@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "legal_entity": { "type": "string" },
+    "founders": { "type": "array", "items": { "type": "string" } },
+    "funding": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "round": { "type": "string" },
+          "amount": { "type": "string" },
+          "date": { "type": "string" }
+        }
+      }
+    },
+    "leadership_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "who": { "type": "string" },
+          "what": { "type": "string" },
+          "date": { "type": "string" }
+        }
+      }
+    }
+  }
+}

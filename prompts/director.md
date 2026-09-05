@@ -1,6 +1,6 @@
 # Director History Prompt
 
-Use with `perplexity_research` when a director appointment or resignation is flagged in financials. Substitute all fields.
+Use as the `extract` question (schemas/person.json) when the officers page flags an appointment or resignation. `fetch` the officer's appointments page first. Substitute all fields.
 
 ---
 
