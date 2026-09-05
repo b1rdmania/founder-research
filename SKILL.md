@@ -1,6 +1,6 @@
 ---
 name: founder-research
-description: Pre-meeting intelligence pipeline for a founder-operated business. Sweeps the web with Exa across company, founder, market, financials, and presence signals, chases every lead to its primary record, then reduces everything to a scannable CIA-style brief with non-obvious signals and opening questions. Use before any call with a founder.
+description: Pre-meeting intelligence pipeline for a founder-operated business. Sweeps the web with Exa across company, founder, market, financials, and presence signals, chases every lead to its primary record, then reduces everything to a scannable CIA-style brief with non-obvious signals and opening questions. Use before any call with a founder, or when the user says "brief me on", "who am I meeting", "pre-call research", "founder research", "run intel on", or "what won't they tell me". One mode; the --sherlock flag adds a username sweep.
 version: 1.2.0
 tools:
   - Bash
@@ -20,7 +20,7 @@ Pre-meeting intelligence for anyone who needs to understand a founder-operated b
 
 Takes public information. Produces a CIA-style brief: named facts, non-obvious signals, gaps, and suggested opening questions. No fluff. Reads in 90 seconds.
 
-**Recommended model: Claude Opus 4.7.** The deep research phase benefits from a model that can make judgment calls about what to pursue, synthesise conflicting signals, and decide what actually matters — not just execute a checklist.
+Run it on a model with judgment. The research phase means deciding what to pursue, synthesising conflicting signals, and deciding what matters — not executing a checklist.
 
 ## Command
 
@@ -29,7 +29,9 @@ Takes public information. Produces a CIA-style brief: named facts, non-obvious s
 /founder-research "<Company Name>" <website> --sherlock
 ```
 
-`--sherlock` runs a username search across 400+ platforms. Use when the founder has low public footprint or the sweep doesn't surface their social accounts.
+`--sherlock` adds the username sweep in Step 3.
+
+Square brackets in commands mean substitute: `[company name]` is the company name.
 
 ---
 
@@ -37,7 +39,7 @@ Takes public information. Produces a CIA-style brief: named facts, non-obvious s
 
 **Search finds leads. Only a primary record makes a fact.** The tool layer is built around that split.
 
-`scripts/exa.mjs` is the discovery and fetch layer (Exa API, key in `EXA_API_KEY` or `~/.exa-key`):
+`scripts/exa.mjs` is the discovery and fetch layer (Exa API, key in `EXA_API_KEY` or `~/.exa-key`). Node 18+ is the one hard dependency. PageSpeed (curl, python3) and Sherlock (pip) are optional: skip them if the binary is absent, and say so in Gaps.
 
 ```bash
 node scripts/exa.mjs sweep "<query>" [--category people|company|news] [--domains a.com,b.org] [--since YYYY-MM-DD] [--n 8]
@@ -51,15 +53,13 @@ node scripts/exa.mjs extract "<question>" --schema schemas/person.json   # typed
 
 Costs are printed to stderr. A full run is well under a dollar.
 
-**Degrade, don't fail.** If the script reports no key, run the same steps on `WebSearch` + `WebFetch`. If the Perplexity MCP is installed, `perplexity_research` is still useful for the *argument* angles (market narrative, the contrarian read) where a synthesised answer beats a list of pages; every name and number it surfaces is still chased with `fetch`.
+**Degrade, don't fail.** If the script reports no key, run the same steps on `WebSearch` + `WebFetch`. External endpoints this skill depends on: the Exa API, the PageSpeed API, and whichever company registry the jurisdiction points to. If the Perplexity MCP is installed, `perplexity_research` is still useful for the *argument* angles (market narrative, the contrarian read) where a synthesised answer beats a list of pages; every name and number it surfaces is still chased with `fetch`.
 
 ---
 
 ## How this works
 
-This skill is intentionally not a rigid step-by-step script. Every business is different. Use the structure below as a framework, not a checklist — decide as you go which threads are worth pulling and which aren't. The prompts in `prompts/` are starting points, not mandatory queries.
-
-The goal is a brief that reads in 90 seconds and tells you something you wouldn't have found on the homepage. That requires judgment, not just research.
+Every business is different. The steps below are a framework: decide as you go which threads are worth pulling. The prompts in `prompts/` are starting points, not mandatory queries. The goal is a brief that reads in 90 seconds and tells you something you wouldn't have found on the homepage.
 
 ---
 
@@ -79,7 +79,7 @@ If it passes: read the website properly. Homepage, About, Products or Services, 
 
 Investigate the company, founder, and market. Run the calls in parallel where possible.
 
-Reference prompts are in `prompts/` — use them as a starting point and adapt based on what you already know about this business. You don't need to run every prompt. Use judgment: if the founder has no public profile, a detailed founder query will return little; if the market is niche, a broad market query will return generalities. Adjust accordingly.
+If the founder has no public profile, a detailed founder query will return little; if the market is niche, a broad market query will return generalities. Adjust.
 
 **Company** (`prompts/company.md`) — `sweep --category company`, then `extract --schema schemas/company.json` for entity, founders, funding, leadership changes
 **Founder** (`prompts/founder.md`) — `sweep --category people`, then `extract --schema schemas/person.json` for roles, public output, direct quotes
@@ -91,9 +91,9 @@ Every lead that will go in the brief gets a `fetch` of its source. Save raw outp
 
 ### Step 2 — Brand and presence
 
-While deep research is running, work through the brand and online presence. Think like a prospective customer, journalist, or stockist who's just heard the name for the first time. Follow that customer journey — what do they find? Where does it break down?
+While the sweep runs, work through the brand and online presence. Think like a prospective customer, journalist, or stockist who's just heard the name for the first time. Follow that customer journey — what do they find? Where does it break down?
 
-Areas to cover — use judgment on which matter for this specific business:
+Areas to cover, as they apply to this business:
 
 **Website** — platform, load quality, photography, copy. Run PageSpeed if it's a consumer brand:
 ```bash
@@ -120,22 +120,25 @@ Save to `enrichment/presence.md`.
 
 ### Step 3 — Gap-fills
 
-Read what you have. Decide what's missing and matters. Run only what will actually change the brief.
+Read what you have. Decide what's missing and matters. Run only what will change the brief; pricing and customer signal run here only if Step 2 came back empty.
 
-**Financial filings** — establish the jurisdiction first; the registry follows it. For UK-registered businesses, always worth pulling (`prompts/financials.md`). Find the record with `sweep "[company name]" --domains find-and-update.company-information.service.gov.uk`, then `fetch` the overview, `/officers`, `/filing-history` and `/charges` pages. Cash, equity, and director history are facts no founder will volunteer. Never run Companies House on a non-UK business or person; homonyms are not leads. For other jurisdictions pin the equivalent registry with `--domains` (Irish CRO, Australian ASIC, SEC EDGAR for US public companies, state Secretary of State sites for US private ones) — if none exists, note it and move on.
+**Financial filings** — establish the jurisdiction first; the registry follows it. Cash, equity, and director history are facts no founder will volunteer.
+- UK-registered: always pull (`prompts/financials.md`). `sweep "[company name]" --domains find-and-update.company-information.service.gov.uk`, then `fetch` the overview, `/officers`, `/filing-history` and `/charges` pages.
+- Elsewhere: pin the equivalent registry with `--domains` (Irish CRO, Australian ASIC, SEC EDGAR for US public companies, state Secretary of State sites for US private ones). If none exists, note it and move on.
+- Never run Companies House on a non-UK business or person. Homonyms are not leads.
 
 **Director research** — if the officers page flags an appointment or resignation, use `prompts/director.md`. `fetch` the officer's own appointments page for their other companies. A co-director hired and gone in 3 months is more revealing than anything on the website.
 
-**Pricing** — if you couldn't find retail prices in Layer 1, use `prompts/pricing.md`. Price opacity is itself a finding.
+**Pricing** — if Step 1 found no retail prices, use `prompts/pricing.md`. Price opacity is itself a finding.
 
 **Customer signal** — if reviews are absent or thin, use `prompts/customer.md`. No UGC after years of trading says something.
 
-**Sherlock** (`--sherlock` flag) — runs username search across 400+ platforms. Use when the founder's social footprint is thin or inconsistent with what you'd expect.
+**Sherlock** (`--sherlock` flag) — username search across 400+ platforms. Use when the founder's social footprint is thin or inconsistent with what you'd expect.
 ```bash
-pip install sherlock-project 2>/dev/null || pip3 install sherlock-project
-sherlock [LIKELY_USERNAME] --print-found --output enrichment/sherlock-raw.txt
+command -v sherlock >/dev/null || pip3 install sherlock-project
+sherlock [likely username] --print-found --output enrichment/sherlock-raw.txt
 ```
-Sherlock checks existence only. Interesting hits need a WebFetch. Save notable finds to `enrichment/sherlock.md`.
+Sherlock checks existence only. Interesting hits need a `fetch`. Save notable finds to `enrichment/sherlock.md`.
 
 ---
 
@@ -143,7 +146,7 @@ Sherlock checks existence only. Interesting hits need a WebFetch. Save notable f
 
 Read all enrichment files. Apply this frame before writing anything:
 
-> CIA field profile. 90 seconds before a meeting. Every sentence must contain a number, a name, or a decision point — or it gets cut. No "it is worth noting." No category trends unless they directly change how you read this specific business. No adjectives without evidence.
+> CIA field profile. 90 seconds before a meeting. Every sentence carries a number, a name, or a decision point, or it gets cut. Every number or name carries a link to the record it was fetched from, or the mark `(unverified)` and a move out of the named-facts sections. A confident fabricated specific is worse than a recorded gap. No "it is worth noting." No category trends unless they directly change how you read this specific business. No adjectives without evidence.
 
 Extract, don't summarise. Kill hedges. Kill filler.
 
@@ -179,7 +182,7 @@ Write to `brief.md`. See `examples/brief-template.md` for structure and what goo
 
 `## Opening questions` — 3 questions grounded in the signals. A well-prepared peer, not a salesperson.
 
-`## Sources` — list enrichment files used.
+`## Sources` — the primary-record URLs fetched in Steps 1 and 3, one per line. Enrichment files stay on disk and are not listed.
 
 **Voice:** Orwell rules throughout. Present tense. No word that can be cut. Mark inference as `(inference)`.
 
@@ -195,12 +198,6 @@ After the call, paste notes into `conversation.md`. Reconcile against the brief:
 - Where what they said contradicted what the research showed
 
 Save to `post-call.md`. This becomes the input for any subsequent work.
-
----
-
-### Step 7 — Optional Notion push
-
-Push `brief.md` to Notion as a sub-page. Raw enrichment files stay on disk only.
 
 ---
 

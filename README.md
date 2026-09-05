@@ -6,7 +6,7 @@ Built for consultants, investors, journalists, and advisors who need to understa
 
 The rule the whole pipeline runs on: **search finds leads, only a primary record makes a fact.** Exa does the finding and the fetching. The record does the proving.
 
-**Recommended: run with Claude Opus 4.7.** The research phase requires judgment — deciding which threads to pull, what to skip, how to read conflicting signals. Opus handles this better than a prescriptive checklist.
+Run it on a model with judgment. The research phase means deciding which threads to pull, what to skip, and how to read conflicting signals, not following a checklist.
 
 ## Usage
 
@@ -77,11 +77,7 @@ Without a key the skill degrades to Claude Code's built-in `WebSearch` and `WebF
 git clone https://github.com/b1rdmania/founder-research ~/.claude/skills/founder-research
 ```
 
-**3. Optional: Notion push**
-
-If you want to push briefs to Notion, add the [Notion MCP](https://github.com/makenotion/notion-mcp-server) to your config and set `NOTION_TOKEN`.
-
-**4. Optional: Sherlock**
+**3. Optional: Sherlock**
 
 ```bash
 pip install sherlock-project
